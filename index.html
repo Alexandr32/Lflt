@@ -51,6 +51,7 @@
 
     // http://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html#l-draw-feature
     // L.Draw.Feature
+    // https://github.com/Leaflet/Leaflet.draw/issues/496 убрать раскрытие кнопок
     L.Draw.MarkerA = L.Draw.Polygon.extend({
     initialize: function (map, options) {
         this.type = 'markerA';
@@ -58,9 +59,8 @@
     },
 
     shapeOptions: {
-                    color: '#f357a1',
-                    weight: 10
-                },
+      color: "#FFF"
+    },
 
 
     addHooks: function () {
@@ -88,12 +88,15 @@
             {
                 enabled: this.options.polygon,
                 handler: new L.Draw.Polygon(map, this.options.polygon),
-                title: L.drawLocal.draw.toolbar.buttons.polygon
+                title: L.drawLocal.draw.toolbar.buttons.polygon,
+                
             },
             {
                 enabled: true,
                 handler: new L.Draw.MarkerA(map, { icon: new L.Icon.Default() }),
-                title: 'Моя кнопка'
+                title: 'Моя кнопка',
+                callback: () => { console.log("22") },
+                context: this
             },
             {
                 enabled: true,
