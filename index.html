@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+    <style>
+        #mapid { height: 600px; }
+       </style>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin=""/>
+<!-- Make sure you put this AFTER Leaflet's CSS -->
+ 
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+ integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+ crossorigin="">
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
+
+<script src="node_modules/leaflet-toolbar/dist/leaflet.toolbar.js"></script>
+<script src="node_modules/leaflet-draw-toolbar/dist/leaflet.draw-toolbar.js"></script>
+<link rel="stylesheet" href="node_modules/leaflet-toolbar/dist/leaflet.toolbar.css"/>
+<link rel="stylesheet" href="node_modules/leaflet-draw-toolbar/dist/leaflet.draw-toolbar.css"/>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="mapid"></div>
+</body>
+
+<script>
+    /*L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    maxZoom: 18,
+    id: 'mapbox/streets-v11',
+    tileSize: 512,
+    zoomOffset: -1,
+    accessToken: 'your.mapbox.access.token'
+    }).addTo(mymap);*/
+
+    var map = L.map('mapid').setView([51.505, -0.09], 13);
+     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+     }).addTo(map);
+
+     //var toolbar = L.Toolbar();
+    //toolbar.addToolbar(map);
+
+    // http://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html#l-draw-feature
+    // L.Draw.Feature
+    L.Draw.MarkerA = L.Draw.Polygon.extend({
+    initialize: function (map, options) {
+        this.type = 'markerA';
+        L.Draw.Polygon.prototype.initialize.call(this, map, options);
+    },
+
+    shapeOptions: {
+                    color: '#f357a1',
+                    weight: 10
+                },
+
+
+    addHooks: function () {
+        L.Draw.Polygon.prototype.addHooks.call(this);
+        //L.Draw.Feature.prototype.addHooks.call(this);
+        
+        console.log('вызвано')
+        /*if (this._map) {
+            this._tooltip.updateContent({ text: 'Click map to place restaurant.' });
+        }*/
+    },
+
+    removeHooks: function () {
+        L.Draw.Polygon.prototype.addHooks.call(this);
+        console.log('Хук удален')
+
+    }
+    });
+
+
+
+    L.DrawToolbar.include({
+        getModeHandlers: function (map) {
+        return [
+            {
+                enabled: this.options.polygon,
+                handler: new L.Draw.Polygon(map, this.options.polygon),
+                title: L.drawLocal.draw.toolbar.buttons.polygon
+            },
+            {
+                enabled: true,
+                handler: new L.Draw.MarkerA(map, { icon: new L.Icon.Default() }),
+                title: 'Моя кнопка'
+            },
+            {
+                enabled: true,
+                handler: new L.Draw.Marker(map, new L.Icon.Default()),
+                title: 'Place hospital marker'
+            },
+            {
+            enabled: true,
+            handler: new L.Draw.Circle(map, new L.Icon.Default()),
+            title: '123'
+            },
+            {
+            enabled: true,
+            handler: new L.Draw.Rectangle(map, new L.Icon.Default()),
+            title: '123'
+            }
+        ];
+    }
+});
+
+    
+
+     // FeatureGroup is to store editable layers
+     var drawnItems = new L.FeatureGroup();
+     map.addLayer(drawnItems);
+
+
+
+     var drawControl = new L.Control.Draw({
+        edit: {
+             featureGroup: drawnItems
+         },
+        draw: {
+            rectangle: true,
+            circle: false,
+            marker: false,
+            circlemarker: false
+        },
+     });
+     map.addControl(drawControl);
+     
+    /*Changes some of the default text for the toolbar buttons*/
+    /*L.drawLocal = {
+        draw: {
+            toolbar: {
+                actions: {
+                    title: 'a test1',
+                    text: 'Done creating1'
+                },
+                finish: {
+                    title: 'Finish drawing1',
+                    text: 'Finish1'
+                },
+                undo: {
+                    title: 'Delete last point drawn1',
+                    text: 'Delete last point1'
+                },
+                buttons: {
+                    polyline: 'Draw a polyline1',
+                    polygon: {
+                        siteProperty: 'Create a site property1',
+                        building: 'Create a building1',
+                        structure: 'Create a structure1'
+                    },
+                    rectangle: {
+                        siteBoundary: 'Create a site boundary1'
+                    },
+                    circle: 'Draw a circle1',
+                    marker: 'Draw a marker1'
+                }
+            },
+            handlers: {
+                circle: {
+                    tooltip: {
+                        start: 'Click and drag to draw circle.1'
+                    },
+                    radius: 'Radius1'
+                },
+                marker: {
+                    tooltip: {
+                        start: 'Click map to place a site marker.1'
+                    }
+                },
+                markerA: {
+                    tooltip: {
+                            start: 'Click to start drawing a site property1',
+                            cont: 'Click to continue drawing a site property1',
+                            end: 'Click first point to close this site property1'
+                        }
+                },
+                polygon: {
+                    siteProperty: {
+                        tooltip: {
+                            start: 'Click to start drawing a site property1',
+                            cont: 'Click to continue drawing a site property1',
+                            end: 'Click first point to close this site property1'
+                        }
+                    },
+                    building: {
+                        tooltip: {
+                            start: 'Click to start drawing a building1',
+                            cont: 'Click to continue drawing a building1',
+                            end: 'Click first point to close this building1'
+                        }
+                    },
+                    structure: {
+                        tooltip: {
+                            start: 'Click to start drawing a structure1',
+                            cont: 'Click to continue drawing a structure1',
+                            end: 'Click first point to close this structure1'
+                        }
+                    }
+                },
+                polyline: {
+                    error: '<strong>Error:</strong> shape edges cannot cross!1',
+                    tooltip: {
+                        start: 'Click to start drawing line1',
+                        cont: 'Click to continue drawing line1',
+                        end: 'Click last point to finish line1'
+                    }
+                },
+                rectangle: {
+                    siteBoundary: {
+                        tooltip: {
+                            start: 'Click and drag to create a site boundary1'
+                        }
+                    }
+                },
+                simpleshape: {
+                    tooltip: {
+                        end: 'Release mouse to finish drawing.1'
+                    }
+                }
+            }
+        }
+    };*/
+
+
+</script>
+
+</html>
